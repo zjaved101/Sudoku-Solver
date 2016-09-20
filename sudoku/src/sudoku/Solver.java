@@ -1,0 +1,68 @@
+package sudoku;
+
+import java.util.*;
+
+//Handles the solving of sudoku grids
+public class Solver {
+	private Grid problem;
+	private ArrayList<Grid> solutions;
+
+	// Constructs a sudoku solver
+	public Solver(Grid problem) {
+		this.problem = problem;
+	}
+
+	// Solves the problem recursively
+	public void solve() {
+		solutions = new ArrayList<>();
+		solveRecurse(problem);
+	}
+
+	// Standard backtracking recursive solver.
+	private void solveRecurse(Grid grid) {
+		Evaluation eval = evaluate(grid);
+
+		if (eval == Evaluation.ABANDON) {
+			return;
+		} else if (eval == Evaluation.ACCEPT) {
+			solutions.add(grid);
+		} else {
+			// Here if eval == Evaluation.CONTINUE.
+			ArrayList<Grid> nextGrids = grid.next9Grids();
+			for (Grid g : nextGrids) {
+				solveRecurse(g);
+			}
+		}
+	}
+
+	// Returns Evaluation.ABANDON if the grid is illegal.
+	// Returns ACCEPT if the grid is legal and complete.
+	// Returns CONTINUE if the grid is legal and incomplete.
+	public Evaluation evaluate(Grid grid) {
+		if (!grid.isLegal())
+			return Evaluation.ABANDON;
+
+		else if (grid.isLegal() && grid.isFull())
+			return Evaluation.ACCEPT;
+
+		else
+			return Evaluation.CONTINUE;
+
+	}
+
+	// Returns solutions to the puzzle
+	public ArrayList<Grid> getSolutions() {
+		return solutions;
+	}
+
+	// Tests the solver method
+	public static void main(String[] args) {
+		Grid g = TestGridSupplier.getPuzzle2(); // or any other puzzle
+		Solver solver = new Solver(g);
+		solver.solve();
+		System.out.println(solver.solutions.get(0));
+		System.out.println("Compare : " + solver.solutions.get(0).equals(TestGridSupplier.getSolution2()));
+		System.out.println("Legal : " + solver.solutions.get(0).isLegal());
+		System.out.println("Full: " + solver.solutions.get(0).isFull());
+	}
+}
